@@ -88,5 +88,6 @@ jobs:
           REPOSITORY: movie-frontend
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t movie-frontend .
-          docker push 570414064424.dkr.ecr.us-east-1.amazonaws.com/movie-frontend:latest
+          cd backend
+          docker build -t $REGISTRY/$REGISTRY_ALIAS/$REPOSITORY:$IMAGE_TAG .
+          docker push $REGISTRY/$REGISTRY_ALIAS/$REPOSITORY:$IMAGE_TAG
