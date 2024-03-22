@@ -32,7 +32,7 @@ jobs:
       - run: cd frontend && npm ci
 
       # Run the linter.
-      - run: cd frontend && npm run lint
+      - run: cd frontend && npm run lint .
 
       # Send a console message at completion.
       - run: |
