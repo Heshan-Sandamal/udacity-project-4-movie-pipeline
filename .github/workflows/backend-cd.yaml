@@ -114,7 +114,7 @@ jobs:
       - name: Deploy Image
         env:
           REGISTRY: 570414064424.dkr.ecr.us-east-1.amazonaws.com
-          REPOSITORY: movie-backend
+          REPOSITORY: backend
           IMAGE_TAG: ${{ github.sha }}
         run: |
           cd backend && kustomize edit set image backend=$REGISTRY/$REPOSITORY:$IMAGE_TAG
