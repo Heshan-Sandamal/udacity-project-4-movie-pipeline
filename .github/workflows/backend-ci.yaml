@@ -1,0 +1,71 @@
+name: ci-fullstack-workflow
+
+# Ensure the workflow runs on schedule (Sunday at 0:00) and on push to the main branch
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'backend/**'
+
+#Use a matrix strategy to use Node.js versions 16.x and 18.x
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Check out the code from the repository.
+      - uses: actions/checkout@v3
+
+      # Set up a Node.js environment using the specified node version.
+      - uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+
+      # Install the dependencies.
+      - run: cd backend && python -m pip install --upgrade pip
+
+      - run: cd backend && pip install --user pipenv
+
+      # Run the linter.
+      - run: cd backend && pipenv run lint
+
+      # Send a console message at completion.
+      - run: |
+          echo "Hello ${{github.actor}}. You pushed to ${{github.repository}} at $(date)."
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Check out the code from the repository.
+      - uses: actions/checkout@v3
+
+      # Set up a Node.js environment using the specified node version.
+      - uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+
+      # Install the dependencies.
+      - run: cd backend && python -m pip install --upgrade pip
+
+      - run: cd backend && pip install --user pipenv
+
+      # Run the linter.
+      - run: cd backend && pipenv run test
+
+      # Send a console message at completion.
+      - run: |
+          echo "Hello ${{github.actor}}. You pushed to ${{github.repository}} at $(date)."
+
+        #  build:
+        #    needs: [ lint, test ]
+        #    runs-on: ubuntu-latest
+        #    steps:
+        #      - name: Publish test results
+        #        uses: actions/upload-artifact@v3
+        #        with:
+        #          name: test-results
+        #          path: test-results.xml
+
+        
