@@ -90,5 +90,5 @@ jobs:
           REPOSITORY: movie-frontend
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          cd backend && docker build -t $REGISTRY/$REGISTRY_ALIAS/$REPOSITORY:$IMAGE_TAG .
-          cd backend && docker push $REGISTRY/$REGISTRY_ALIAS/$REPOSITORY:$IMAGE_TAG
+          cd backend && docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+          cd backend && docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
