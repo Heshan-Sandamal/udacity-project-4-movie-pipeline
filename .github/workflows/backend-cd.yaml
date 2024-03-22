@@ -109,7 +109,7 @@ jobs:
 #          aws-session-token: ${{secrets.AWS_SESSION_TOKEN}}
           aws-region: us-east-1
 
-      - run: aws eks update-kubeconfig
+      - run: aws eks update-kubeconfig --name cluster
 
       - name: Deploy Image
         env:
