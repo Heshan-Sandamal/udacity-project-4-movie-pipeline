@@ -1,0 +1,116 @@
+name: cd-frontend-workflow
+
+on:
+  # Manual trigger using the workflow_dispatch event
+  workflow_dispatch:
+
+  # Automatic trigger on push events to the main branch
+  push:
+    branches:
+      - master
+#    paths:
+#      - 'frontend/**'
+
+#Use a matrix strategy to use Node.js versions 16.x and 18.x
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Check out the code from the repository.
+      - uses: actions/checkout@v3
+
+      # Set up a Node.js environment using the specified node version.
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "16.x"
+
+      # clear cache
+      - run: cd frontend && npm cache clean --force
+
+      # Install the dependencies.
+      - run: cd frontend && npm ci
+
+      # Run the linter.
+      - run: cd frontend && npm run lint
+
+      # Send a console message at completion.
+      - run: |
+          echo "Lint Step Completed"
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Check out the code from the repository.
+      - uses: actions/checkout@v3
+
+      # Set up a Node.js environment using the specified node version.
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "16.x"
+
+      # clear cache
+      - run: cd frontend && npm cache clean --force
+
+      # Install the dependencies.
+      - run: cd frontend && npm ci
+
+      # Run the tests.
+      - run: cd frontend && npm test --passWithNoTests
+
+      # Send a console message at completion.
+      - run: |
+          echo "Test Step Completed"
+
+  build:
+    needs: [ lint,test ]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#          aws-session-token: ${{secrets.AWS_SESSION_TOKEN}}
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push docker image to Amazon ECR
+        env:
+          REGISTRY: 570414064424.dkr.ecr.us-east-1.amazonaws.com
+          REPOSITORY: movie-frontend
+          IMAGE_TAG: ${{ github.sha }}
+          REACT_APP_MOVIE_API_URL: http://abc.com
+        run: |
+          cd frontend && docker build --build-arg REACT_APP_MOVIE_API_URL=$REACT_APP_MOVIE_API_URL -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+
+  deploy:
+    needs: [ lint,test, build ]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#          aws-session-token: ${{secrets.AWS_SESSION_TOKEN}}
+          aws-region: us-east-1
+
+      - run: aws eks update-kubeconfig
+
+      - run: cd backend/k8s && kustomize edit set image frontend=$REGISTRY/$REPOSITORY:$IMAGE_TAG
+
+      - run: cd backend/k8s && kustomize build | kubectl apply -f -
+
+        
