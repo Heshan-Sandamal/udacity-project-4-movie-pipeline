@@ -27,6 +27,8 @@ jobs:
 
       - run: cd backend && pip install --user pipenv
 
+      - run : cd backend && pipenv install
+
       # Run the linter.
       - run: cd backend && pipenv run lint
 
@@ -50,6 +52,8 @@ jobs:
       - run: cd backend && python -m pip install --upgrade pip
 
       - run: cd backend && pip install --user pipenv
+
+      - run : cd backend && pipenv install
 
       # Run the linter.
       - run: cd backend && pipenv run test
