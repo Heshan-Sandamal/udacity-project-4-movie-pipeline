@@ -25,9 +25,9 @@ jobs:
       # Install the dependencies.
       - run: cd backend && python -m pip install --upgrade pip
 
-      - run: cd backend && pip install --user pipenv
+      - run: cd backend && pip install pipenv
 
-      - run : cd backend && pipenv sync && pip show -f flake8
+      - run : cd backend && pipenv install --dev
 
       # Run the linter.
       - run: cd backend && pipenv run lint
