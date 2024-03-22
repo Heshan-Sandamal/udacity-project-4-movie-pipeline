@@ -36,7 +36,7 @@ jobs:
 
       # Send a console message at completion.
       - run: |
-          echo "Hello ${{github.actor}}. You pushed to ${{github.repository}} at $(date)."
+          echo "List step completed"
 
   test:
     runs-on: ubuntu-latest
@@ -57,20 +57,52 @@ jobs:
       - run: cd frontend && npm ci
 
       # Run the tests.
-      - run: cd frontend && npm test --passWithNoTests
+      - run: cd frontend && npm run test
 
       # Send a console message at completion.
       - run: |
-          echo "Hello ${{github.actor}}. You pushed to ${{github.repository}} at $(date)."
+          echo "Test step completed"
 
-#  build:
-#    needs: [ lint, test ]
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Publish test results
-#        uses: actions/upload-artifact@v3
+  build:
+    needs: [ lint,test ]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # Set up a Node.js environment using the specified node version.
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "16.x"
+
+      # clear cache
+      - run: cd frontend && npm cache clean --force
+
+      # Install the dependencies.
+      - run: cd frontend && npm ci
+
+      # Run the tests.
+      - run: cd frontend && npm run test
+
+#      - name: Configure AWS Credentials
+#        uses: aws-actions/configure-aws-credentials@v2
 #        with:
-#          name: test-results
-#          path: test-results.xml
+#          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#          aws-session-token: ${{secrets.AWS_SESSION_TOKEN}}
+#          aws-region: us-east-1
+#
+#      - name: Login to Amazon ECR
+#        id: login-ecr
+#        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Application
+        env:
+#          REGISTRY: 570414064424.dkr.ecr.us-east-1.amazonaws.com
+#          REPOSITORY: movie-frontend
+#          IMAGE_TAG: ${{ github.sha }}
+          REACT_APP_MOVIE_API_URL: http://abc.com
+        run: |
+          cd frontend && docker build --build-arg REACT_APP_MOVIE_API_URL=$REACT_APP_MOVIE_API_URL
 
         
