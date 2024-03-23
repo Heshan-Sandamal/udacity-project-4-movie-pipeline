@@ -13,7 +13,6 @@ on:
 
 env:
   # Setting an environment variable with the value of a configuration variable
-  FRONTEND_ECR_URL: ${{ vars.FRONTEND_ECR_URL }}
   REACT_APP_MOVIE_API_URL: ${{ vars.REACT_APP_MOVIE_API_URL }}
 
 jobs:
@@ -90,6 +89,6 @@ jobs:
 
       - name: Build Application
         run: |
-          cd frontend && docker build --build-arg REACT_APP_MOVIE_API_URL=$REACT_APP_MOVIE_API_URL
+          cd frontend && docker build --build-arg REACT_APP_MOVIE_API_URL=$REACT_APP_MOVIE_API_URL .
 
         
