@@ -72,4 +72,4 @@ jobs:
       # Build Backend
       - name: Build Backend
         run: |
-          cd backend && docker build
+          cd backend && docker build .
