@@ -7,9 +7,9 @@ on:
   # Automatic trigger on push events to the main branch
   push:
     branches:
-      - master
-#    paths:
-#      - 'frontend/**'
+      - main
+    paths:
+      - 'frontend/**'
 
 env:
   # Setting an environment variable with the value of a configuration variable
