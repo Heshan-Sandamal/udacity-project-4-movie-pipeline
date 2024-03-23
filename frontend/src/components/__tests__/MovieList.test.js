@@ -10,6 +10,10 @@ const mockMovies = [
   { id: 2, title: 'Movie 2' },
 ];
 
+
+
+
+
 test('renders movie titles', async () => {
   axios.get.mockResolvedValueOnce({ data: { movies: mockMovies } });
 
