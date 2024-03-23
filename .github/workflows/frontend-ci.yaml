@@ -90,6 +90,7 @@ jobs:
 
       - name: Build Application
         run: |
-          cd frontend && docker build --build-arg REACT_APP_MOVIE_API_URL=$REACT_APP_MOVIE_API_URL
+          cd frontend
+          docker build --build-arg REACT_APP_MOVIE_API_URL=$REACT_APP_MOVIE_API_URL
 
         
