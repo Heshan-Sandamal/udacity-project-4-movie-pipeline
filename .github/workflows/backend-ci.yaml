@@ -11,10 +11,6 @@ on:
     paths:
       - 'backend/**'
 
-env:
-  # Setting an environment variable with the value of a configuration variable
-  BACKEND_ECR_URL: ${{ vars.BACKEND_ECR_URL }}
-
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -76,5 +72,4 @@ jobs:
       # Build Backend
       - name: Build Backend
         run: |
-          cd backend
-          docker build
+          cd backend && docker build
