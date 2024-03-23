@@ -86,7 +86,7 @@ jobs:
       - name: Build docker image
         env:
           REGISTRY: 570414064424.dkr.ecr.us-east-1.amazonaws.com
-          REPOSITORY: movie-backend
+          REPOSITORY: backend
           IMAGE_TAG: ${{ github.sha }}
         run: |
           cd backend && docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
