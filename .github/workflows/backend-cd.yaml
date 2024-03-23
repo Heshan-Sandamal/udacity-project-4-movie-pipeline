@@ -11,6 +11,10 @@ on:
 #    paths:
 #      - 'backend/**'
 
+env:
+  # Setting an environment variable with the value of a configuration variable
+  BACKEND_ECR_URL: ${{ vars.BACKEND_ECR_URL }}
+
 #Use a matrix strategy to use Node.js versions 16.x and 18.x
 jobs:
   lint:
@@ -26,18 +30,17 @@ jobs:
           python-version: "3.10"
 
       # Install the dependencies.
-      - run: cd backend && python -m pip install --upgrade pip
-
-      - run: cd backend && pip install pipenv
-
-      - run: cd backend && pipenv install --dev
+      - run: |
+          cd backend && python -m pip install --upgrade pip
+          pip install pipenv
+          pipenv install --dev
 
       # Run the linter.
       - run: cd backend && pipenv run lint .
 
       # Send a console message at completion.
       - run: |
-          echo "Hello ${{github.actor}}. You pushed to ${{github.repository}} at $(date)."
+          echo "Lint Stage Completed"
 
   test:
     runs-on: ubuntu-latest
@@ -52,18 +55,16 @@ jobs:
           python-version: "3.10"
 
       # Install the dependencies.
-      - run: cd backend && python -m pip install --upgrade pip
-
-      - run: cd backend && pip install --user pipenv
-
-      - run: cd backend && pipenv sync
+      - run: |
+          cd backend && python -m pip install --upgrade pip
+          pip install pipenv
+          pipenv install --dev
 
       # Run the linter.
       - run: cd backend && pipenv run test
 
-      # Send a console message at completion.
       - run: |
-          echo "Hello ${{github.actor}}. You pushed to ${{github.repository}} at $(date)."
+          echo "Test Stage Completed"
 
   build:
     needs: [ lint,test ]
@@ -77,7 +78,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: ${{ vars.AWS_REGION }}
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -85,12 +86,10 @@ jobs:
 
       - name: Build docker image
         env:
-          REGISTRY: 570414064424.dkr.ecr.us-east-1.amazonaws.com
-          REPOSITORY: backend
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          cd backend && docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
-          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          cd backend && docker build -t $BACKEND_ECR_URL:$IMAGE_TAG .
+          docker push $BACKEND_ECR_URL:$IMAGE_TAG
   
 
   deploy:
@@ -105,16 +104,14 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: ${{ vars.AWS_REGION }}
 
+      # Update kube config
       - run: aws eks update-kubeconfig --name cluster
 
-      - name: Deploy Image
+      - name: Deploy Backend
         env:
-          REGISTRY: 570414064424.dkr.ecr.us-east-1.amazonaws.com
-          REPOSITORY: backend
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          cd backend/k8s && kustomize edit set image backend=$REGISTRY/$REPOSITORY:$IMAGE_TAG
-
-      - run: cd backend/k8s && kustomize build | kubectl apply -f -
+          cd backend/k8s && kustomize edit set image backend=$BACKEND_ECR_URL:$IMAGE_TAG
+          kustomize build | kubectl apply -f -
