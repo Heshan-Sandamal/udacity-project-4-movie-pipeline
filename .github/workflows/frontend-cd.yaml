@@ -79,7 +79,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ vars.AWS_REGION }}
+          aws-region: ${{ vars.STAGE.AWS_REGION }}
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -104,14 +104,12 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ vars.AWS_REGION }}
+          aws-region: ${{ vars.STAGE.AWS_REGION }}
 
       - run: aws eks update-kubeconfig --name cluster
 
       - name: Deploy Frontend
         env:
-          REGISTRY: 570414064424.dkr.ecr.us-east-1.amazonaws.com
-          REPOSITORY: frontend
           IMAGE_TAG: ${{ github.sha }}
         run: |
           cd frontend/k8s && kustomize edit set image frontend=$FRONTEND_ECR_URL:$IMAGE_TAG
