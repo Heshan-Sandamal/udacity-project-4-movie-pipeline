@@ -37,7 +37,7 @@ jobs:
       # Run the linter.
       - run: cd backend && pipenv run lint .
 
-      # Send a console message at completion.
+      # Send a console message at completion
       - run: |
           echo "Lint Stage Completed"
 
