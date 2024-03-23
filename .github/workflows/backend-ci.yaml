@@ -5,9 +5,9 @@ on:
   workflow_dispatch:
 
   # Automatic trigger on push events to the main branch
-  push:
+  pull_request:
     branches:
-      - master
+      - main
     paths:
       - 'backend/**'
 
